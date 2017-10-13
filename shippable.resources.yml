@@ -1,0 +1,200 @@
+resources:
+
+#---------------------------------------------------------------#
+#-------------------- Common INFRA Resources -------------------#
+#---------------------------------------------------------------#
+
+# AWS credentials
+  - name: aws_creds
+    type: integration
+    integration: "dr-aws"
+
+# Security Ops scripts repo
+  - name: ans_demo
+    type: gitRepo
+    integration: "dr-github"
+    pointer:
+      sourceName: "devops-recipes/ans_demo"
+      branch: master
+
+# AMI VPC Creation Config
+  - name: aws_region
+    type: params
+    version:
+      params:
+        AWS_REGION: "us-east-1"
+
+##---------------------------------------------------------------#
+##----------------------- AMI VPC Resources --------------------#
+##---------------------------------------------------------------#
+
+# AMI VPC Creation Config
+#   - name: ami_conf
+#     type: params
+#     version:
+#       params:
+#         STATE_RES_NAME: "ami_info"
+#         VPC_NAME: "ami_vpc"
+#         VPC_CIDR_BLOCK: "200.0.0.0/16"
+#         VPC_SUBNET_NAME: "ami_vpc_subnet_pub"
+#         VPC_SUBNET_CIDR_BLOCK: "200.0.0.0/24"
+#         BASE_EC2_AMI: "ami-841f46ff"
+#
+# # Output of AMI Provisioning
+#   - name: ami_info
+#     type: params
+#     version:
+#       params:
+#         SEED: "initial_version"
+#
+# # Base ECS AMI ID
+#   - name: ami_sec_approved
+#     type: params
+#     version:
+#       params:
+#         SEED: "initial_version"
+
+###---------------------------------------------------------------#
+###----------------------- TF Resources --------------------#
+###---------------------------------------------------------------#
+# Instance Profile TERRAFORM State
+  - name: inst_tf_state
+    type: state
+
+# OUT Instance Profile Info
+  - name: inst_prof_name
+    type: params
+    version:
+      params:
+        SEED: "initial_version"
+
+
+###---------------------------------------------------------------#
+###----------------------- BUILD/CI Resources --------------------#
+###---------------------------------------------------------------#
+
+# Docker Image packaging sample Node app
+  - name: demo_doc_img
+    type: image
+    integration: "dr-dockerhub"
+    pointer:
+      sourceName: "devopsrecipes/ci-push-docker-hub"
+    seed:
+      versionName: "master.4"
+
+# Docker Options for packaged
+  - name: doc_img_opts
+    type: dockerOptions
+    version:
+#      memory: 256
+#      cpuShares: 256
+      portMappings:
+        - 80:80
+
+#---------------------------------------------------------------#
+#----------------------- TEST VPC Resources --------------------#
+#---------------------------------------------------------------#
+# Test VPC Creation Config
+  - name: test_conf
+    type: params
+    version:
+      params:
+        STATE_RES_NAME: "test_info"
+        VPC_NAME: "test_vpc"
+        VPC_CIDR_BLOCK: "210.0.0.0/16"
+        VPC_SUBNET_NAME: "test_vpc_subnet_pub"
+        VPC_SUBNET_CIDR_BLOCK: "210.0.0.0/24"
+        ECS_CLUSTER_NAME: "test-aws"
+        INST_COUNT: 2
+        INST_TAG: "test_ecs_inst"
+        INST_TYPE: "t2.micro"
+
+# Output of Test Provisioning
+  - name: test_info
+    type: params
+    version:
+      params:
+        SEED: "initial_version"
+
+# Reference to ECS Test Cluster
+  - name: test_env_ecs
+    type: cluster
+    integration: "dr-aws"
+    pointer:
+      sourceName : "test-aws"
+      region: "us-east-1"
+
+#---------------------------------------------------------------#
+#------------- Application Release Automation Resources --------#
+#---------------------------------------------------------------#
+# REPO of SIT code
+  - name: sit_repo
+    type: gitRepo
+    integration: "dr-github"
+    pointer:
+      sourceName: "devops-recipes/demoSIT"
+      branch: master
+
+# SIT env vars for BOX
+  - name: sit_params
+    type: params
+    version:
+      params:
+        API_URL: "54.158.18.50:8080"
+        API_TOKEN: "NA"
+
+# # Seed version resource
+#   - name: seed_app_ver
+#     type: version
+#     seed:
+#       versionName: "1.0.0"
+
+# # Current Prod version
+#   - name: prod_app_ver
+#     type: params
+#     version:
+#       params:
+#         RELEASE_VER_NUMBER: "1.0.0"
+
+#---------------------------------------------------------------#
+#----------------------- PROD VPC Resources --------------------#
+#---------------------------------------------------------------#
+
+# # Prod Creation Config
+#   - name: prod_conf
+#     type: params
+#     version:
+#       params:
+#         STATE_RES_NAME: "prod_info"
+#         VPC_NAME: "prod_vpc"
+#         VPC_CIDR_BLOCK: "100.0.0.0/16"
+#         VPC_SUBNET_NAME: "prod_vpc_subnet_pub"
+#         VPC_SUBNET_CIDR_BLOCK: "100.0.0.0/24"
+#         ECS_CLUSTER_NAME: "prod-aws"
+#         INST_COUNT: 3
+#         INST_TAG: "prod_ecs_inst"
+#         INST_TYPE: "t2.micro"
+#
+# # Output of Prod Provisioning
+#   - name: prod_info
+#     type: params
+#     version:
+#       params:
+#         SEED: "initial_version"
+#
+# # Reference to ECS Prod Cluster
+#   - name: prod_env_ecs
+#     type: cluster
+#     integration: "demo_aws_key"
+#     pointer:
+#       sourceName : "prod-aws"
+#       region: "us-east-1"
+#
+# #---------------------------------------------------------------#
+# #---------------------- CD to PROD Resources -------------------#
+# #---------------------------------------------------------------#
+# # Number of packaged WARs to deploy to Prod
+#   - name: scale_app_prod
+#     type: replicas
+#     version:
+#       count: 1

@@ -1,0 +1,395 @@
+jobs:
+
+#---------------------------------------------------------------#
+#----------------- AMI Setup Using ANsible  --------------------#
+#---------------------------------------------------------------#
+
+# # PROV AMI VPC with Ansible
+#   - name: prov_ami_vpc
+#     type: runSh
+#     steps:
+#       - IN: aws_region
+#       - IN: ami_conf
+#       - IN: aws_creds
+#         switch: off
+#       - IN: ans_demo
+#         switch: off
+#       - TASK:
+#         - script: |
+#             export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+#             export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+#             cd $(shipctl get_resource_state ans_demo)
+#             shipctl replace an_vpc_prov.yml
+#             ansible-playbook -v an_vpc_prov.yml
+#       - OUT: ami_info
+#
+#
+# # CREATE AWS AMI used to deploy ECS VMs with PACKER
+#   - name: build_ecs_ami
+#     type: runSh
+#     steps:
+#       - IN: aws_region
+#       - IN: prov_ami_vpc
+#       - IN: ami_info
+#         switch: off
+#       - IN: ami_conf
+#         switch: off
+#       - IN: aws_creds
+#         switch: off
+#       - IN: ans_demo
+#         switch: off
+#       - TASK:
+#         - script: . IN/ans_demo/gitRepo/pk_basePack.sh
+#       - OUT: ami_sec_approved
+#
+# # DEPROV AMI with Ansible
+#   - name: deprov_ami_vpc
+#     type: runSh
+#     steps:
+#       - IN: aws_region
+#       - IN: build_ecs_ami
+#         switch: off
+#       - IN: ami_conf
+#         switch: off
+#       - IN: ami_info
+#         switch: off
+#       - IN: aws_creds
+#         switch: off
+#       - IN: ans_demo
+#         switch: off
+#       - TASK:
+#         - script: |
+#             export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+#             export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+#             cd $(shipctl get_resource_state ans_demo)
+#             shipctl replace an_vpc_deprov.yml
+#             ansible-playbook -v an_vpc_deprov.yml
+
+#---------------------------------------------------------------#
+#------------------------- INST PROF Setup -----------------------#
+#---------------------------------------------------------------#
+
+# SETUP Instance Profile with TERRAFORM
+  - name: setup_inst_prof
+    type: runSh
+    steps:
+      - IN: aws_region
+      - IN: inst_tf_state
+      - IN: aws_creds
+        switch: off
+      - IN: ans_demo
+        switch: off
+      - TASK:
+        - script: . /build/IN/ans_demo/gitRepo/tf_createInstProf.sh create
+      - OUT: inst_tf_state
+      - OUT: inst_prof_name
+    on_success:
+      - script: echo "SUCCESS"
+    on_failure:
+      - script: echo "FAILURE"
+    always:
+      - script: . /build/IN/ans_demo/gitRepo/tf_archiveState.sh inst_tf_state
+
+# Delete Instance Profile with TERRAFORM
+  - name: delete_inst_prof
+    type: runSh
+    steps:
+      - IN: setup_inst_prof
+        switch: off
+      - IN: aws_region
+      - IN: inst_tf_state
+      - IN: aws_creds
+        switch: off
+      - IN: ans_demo
+        switch: off
+      - TASK:
+        - script: . /build/IN/ans_demo/gitRepo/tf_createInstProf.sh delete
+      - OUT: inst_tf_state
+    on_success:
+      - script: echo "SUCCESS"
+    on_failure:
+      - script: echo "FAILURE"
+    always:
+      - script: . /build/IN/ans_demo/gitRepo/tf_archiveState.sh inst_tf_state
+
+
+#---------------------------------------------------------------#
+#------------------- BUILD/CI with SHIPPABLE CI ----------------#
+#---------------------------------------------------------------#
+
+ # PACKAGE sample Node.js into docker container
+
+  - name: push-docker-hub_runCI
+    type: runCI
+    steps:
+      - OUT: demo_doc_img
+
+# DEFINE app micro service
+  - name: create_app_man
+    type: manifest
+    steps:
+      - IN: demo_doc_img
+      - IN: doc_img_opts
+
+#---------------------------------------------------------------#
+#-------------- TEST Infra Prov Using ANsible  -----------------#
+#---------------------------------------------------------------#
+
+# PROV Test VPC with Ansible
+  - name: prov_test_vpc
+    type: runSh
+    steps:
+      - IN: create_app_man
+      - IN: aws_region
+      - IN: aws_creds
+      - IN: ans_demo
+        switch: off
+      - IN: test_conf
+      - TASK:
+        - script: |
+            export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+            export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+            cd $(shipctl get_resource_state ans_demo)
+            shipctl replace an_vpc_prov.yml
+            ansible-playbook -v an_vpc_prov.yml
+      - OUT: test_info
+
+# PROV Test ECS Cluster with Ansible
+  - name: prov_test_ecs
+    type: runSh
+    steps:
+      - IN: prov_test_vpc
+      - IN: test_conf
+      - IN: aws_region
+      - IN: aws_creds
+        switch: off
+      - IN: ans_demo
+        switch: off
+      - IN: inst_prof_name
+        switch: off
+      - TASK:
+        - script: |
+            sudo pip install boto3
+            export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+            export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+            cd $(shipctl get_resource_state ans_demo)
+            shipctl replace an_ecs_prov.yml
+            ansible-playbook -v an_ecs_prov.yml
+      - OUT: test_info
+      - OUT: test_env_ecs
+
+##---------------------------------------------------------------#
+##-------------------- App Release Automation -------------------#
+##---------------------------------------------------------------#
+
+# DEPLOY to TEST environment
+  - name: deploy_app_test
+    type: deploy
+    steps:
+      - IN: create_app_man
+        switch: off
+      - IN: prov_test_ecs
+      - IN: test_env_ecs
+        switch: off
+      - TASK: managed
+
+# RUN System Integration Testing
+  - name: sit
+    type: runSh
+    steps:
+      - IN: sit_repo
+      - IN: deploy_app_test
+      - IN: sit_params
+      - TASK:
+        - script: IN/sit_repo/gitRepo/test.sh sit_params
+    on_success:
+      - script: touch /build/state/success.txt
+    on_failure:
+      - script: touch /build/state/failure.txt
+
+# # CREATE a production ready release
+#   - name: release_app
+#     type: release
+#     steps:
+#       - IN: seed_app_ver
+#       - IN: sit
+#       - IN: deploy_app_test
+#         switch: off
+#       - TASK: managed
+#         bump: patch
+
+#---------------------------------------------------------------#
+#----------------------- Deprov Test Infra----------------------#
+#---------------------------------------------------------------#
+
+# DEPROV TEST Infra with Ansible
+  - name: deprov_test_infra
+    type: runSh
+    steps:
+      - IN: sit
+      - IN: aws_region
+      - IN: test_conf
+        switch: off
+      - IN: test_info
+        switch: off
+      - IN: aws_creds
+        switch: off
+      - IN: ans_demo
+        switch: off
+      - TASK:
+        - script: |
+            sudo pip install boto3
+            export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+            export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+            cd $(shipctl get_resource_state ans_demo)
+            shipctl replace an_ecs_deprov.yml
+            ansible-playbook -v an_ecs_deprov.yml
+
+# DEPROV TEST VPC with Ansible
+  - name: deprov_test_vpc
+    type: runSh
+    steps:
+      - IN: aws_region
+      - IN: deprov_test_infra
+      - IN: test_conf
+        switch: off
+      - IN: test_info
+        switch: off
+      - IN: aws_creds
+        switch: off
+      - IN: ans_demo
+        switch: off
+      - TASK:
+        - script: |
+            export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+            export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+            cd $(shipctl get_resource_state ans_demo)
+            shipctl replace an_vpc_deprov.yml
+            ansible-playbook -v an_vpc_deprov.yml
+
+
+
+# ##---------------------------------------------------------------#
+# ##----------------------- CD to Production ----------------------#
+# ##---------------------------------------------------------------#
+#
+# # TRIGGER PROD deployment
+#   - name: trig_prod_deploy
+#     type: runSh
+#     steps:
+#       - IN: ans_demo
+#         switch: off
+#       - IN: release_app
+#         switch: off
+#       - OUT: prod_app_ver
+#       - TASK:
+#         - script: IN/ans_demo/gitRepo/setVer.sh release_app prod_app_ver
+#
+# #---------------------------------------------------------------#
+# #-------------- Prod Infra Prov Using ANsible  -----------------#
+# #---------------------------------------------------------------#
+#
+# # PROV Prod VPC with Ansible
+#   - name: prov_prod_vpc
+#     type: runSh
+#     steps:
+#       - IN: trig_prod_deploy
+#       - IN: aws_region
+#       - IN: aws_creds
+#       - IN: ans_demo
+#         switch: off
+#       - IN: prod_conf
+#       - TASK:
+#         - script: |
+#             export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+#             export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+#             cd $(shipctl get_resource_state ans_demo)
+#             shipctl replace an_vpc_prov.yml
+#             ansible-playbook -v an_vpc_prov.yml
+#       - OUT: prod_info
+#
+# # PROV Prod ECS Cluster with Ansible
+#   - name: prov_prod_ecs
+#     type: runSh
+#     steps:
+#       - IN: prov_prod_vpc
+#       - IN: prod_conf
+#       - IN: aws_region
+#       - IN: aws_creds
+#         switch: off
+#       - IN: ans_demo
+#         switch: off
+#       - IN: inst_prof_name
+#         switch: off
+#       - TASK:
+#         - script: |
+#             sudo pip install boto3
+#             export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+#             export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+#             cd $(shipctl get_resource_state ans_demo)
+#             shipctl replace an_ecs_prov.yml
+#             ansible-playbook -v an_ecs_prov.yml
+#       - OUT: prod_env_ecs
+#       - OUT: prod_info
+#
+# # DEPLOY app to PROD
+#   - name: deploy_app_prod
+#     type: deploy
+#     steps:
+#       - IN: prov_prod_ecs
+#       - IN: scale_app_prod
+#       - IN: release_app
+#         switch: off
+#       - IN: prod_env_ecs
+#         switch: off
+#       - TASK: managed
+# #        deployMethod: replace
+#
+# #---------------------------------------------------------------#
+# #----------------------- Deprov Prod Infra----------------------#
+# #---------------------------------------------------------------#
+# # DEPROV PROD Infra with Ansible
+#   - name: deprov_prod_infra
+#     type: runSh
+#     steps:
+#       - IN: deploy_app_prod
+#         switch: off
+#       - IN: aws_region
+#       - IN: prod_conf
+#         switch: off
+#       - IN: prod_info
+#         switch: off
+#       - IN: aws_creds
+#         switch: off
+#       - IN: ans_demo
+#         switch: off
+#       - TASK:
+#         - script: |
+#             sudo pip install boto3
+#             export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+#             export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+#             cd $(shipctl get_resource_state ans_demo)
+#             shipctl replace an_ecs_deprov.yml
+#             ansible-playbook -v an_ecs_deprov.yml
+#
+# # DEPROV PROD VPC with Ansible
+#   - name: deprov_prod_vpc
+#     type: runSh
+#     steps:
+#       - IN: aws_region
+#       - IN: deprov_prod_infra
+#       - IN: prod_conf
+#         switch: off
+#       - IN: prod_info
+#         switch: off
+#       - IN: aws_creds
+#         switch: off
+#       - IN: ans_demo
+#         switch: off
+#       - TASK:
+#         - script: |
+#             export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+#             export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+#             cd $(shipctl get_resource_state ans_demo)
+#             shipctl replace an_vpc_deprov.yml
+#             ansible-playbook -v an_vpc_deprov.yml
