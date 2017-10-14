@@ -109,7 +109,7 @@ resources:
 #------------- Application Release Automation Resources --------#
 #---------------------------------------------------------------#
 # REPO of SIT code
-  - name: sit_repo_odte
+  - name: sit_repo
     type: gitRepo
     integration: "dr-github"
     pointer:

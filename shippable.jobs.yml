@@ -126,11 +126,11 @@ jobs:
   - name: sit_odte
     type: runSh
     steps:
-      - IN: sit_repo_odte
+      - IN: sit_repo
       - IN: deploy_app_test_odte
       - IN: sit_params_odte
       - TASK:
-        - script: IN/sit_repo_odte/gitRepo/test.sh sit_params
+        - script: IN/sit_repo/gitRepo/test.sh sit_params
     on_success:
       - script: touch /build/state/success.txt
     on_failure:
