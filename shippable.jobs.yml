@@ -90,6 +90,8 @@ jobs:
       - IN: test_vpc_conf_odte
         switch: off
       - TASK:
+        - script: echo $SCRIPTS_REPO_ODTE_STATE
+        - script: ls $SCRIPTS_REPO_ODTE_STATE        
         - script: shipctl replace
             $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible/ansible.cfg
             $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible/group_vars/ecs-cluster-vars.yml
