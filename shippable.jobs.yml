@@ -1,51 +1,51 @@
 jobs:
 
-#---------------------------------------------------------------#
-#------------------------- INST PROF Setup -----------------------#
-#---------------------------------------------------------------#
-
-# SETUP Instance Profile with TERRAFORM
-  - name: setup_inst_prof
-    type: runSh
-    steps:
-      - IN: aws_region
-      - IN: inst_tf_state
-      - IN: aws_creds
-        switch: off
-      - IN: scripts_repo
-        switch: off
-      - TASK:
-        - script: . /build/IN/scripts_repo/gitRepo/tf_createInstProf.sh create
-      - OUT: inst_tf_state
-      - OUT: inst_prof_name
-    on_success:
-      - script: echo "SUCCESS"
-    on_failure:
-      - script: echo "FAILURE"
-    always:
-      - script: . /build/IN/scripts_repo/gitRepo/tf_archiveState.sh inst_tf_state
-
-# Delete Instance Profile with TERRAFORM
-  - name: delete_inst_prof
-    type: runSh
-    steps:
-      - IN: setup_inst_prof
-        switch: off
-      - IN: aws_region
-      - IN: inst_tf_state
-      - IN: aws_creds
-        switch: off
-      - IN: scripts_repo
-        switch: off
-      - TASK:
-        - script: . /build/IN/scripts_repo/gitRepo/tf_createInstProf.sh delete
-      - OUT: inst_tf_state
-    on_success:
-      - script: echo "SUCCESS"
-    on_failure:
-      - script: echo "FAILURE"
-    always:
-      - script: . /build/IN/scripts_repo/gitRepo/tf_archiveState.sh inst_tf_state
+# #---------------------------------------------------------------#
+# #------------------------- INST PROF Setup -----------------------#
+# #---------------------------------------------------------------#
+#
+# # SETUP Instance Profile with TERRAFORM
+#   - name: setup_inst_prof
+#     type: runSh
+#     steps:
+#       - IN: aws_region
+#       - IN: inst_tf_state
+#       - IN: aws_creds
+#         switch: off
+#       - IN: scripts_repo
+#         switch: off
+#       - TASK:
+#         - script: . /build/IN/scripts_repo/gitRepo/tf_createInstProf.sh create
+#       - OUT: inst_tf_state
+#       - OUT: inst_prof_name
+#     on_success:
+#       - script: echo "SUCCESS"
+#     on_failure:
+#       - script: echo "FAILURE"
+#     always:
+#       - script: . /build/IN/scripts_repo/gitRepo/tf_archiveState.sh inst_tf_state
+#
+# # Delete Instance Profile with TERRAFORM
+#   - name: delete_inst_prof
+#     type: runSh
+#     steps:
+#       - IN: setup_inst_prof
+#         switch: off
+#       - IN: aws_region
+#       - IN: inst_tf_state
+#       - IN: aws_creds
+#         switch: off
+#       - IN: scripts_repo
+#         switch: off
+#       - TASK:
+#         - script: . /build/IN/scripts_repo/gitRepo/tf_createInstProf.sh delete
+#       - OUT: inst_tf_state
+#     on_success:
+#       - script: echo "SUCCESS"
+#     on_failure:
+#       - script: echo "FAILURE"
+#     always:
+#       - script: . /build/IN/scripts_repo/gitRepo/tf_archiveState.sh inst_tf_state
 
 
 #---------------------------------------------------------------#
