@@ -9,64 +9,31 @@ resources:
     type: integration
     integration: "dr-aws"
 
+# AWS PEM key
+  - name: aws_pem
+    type: integration
+    integration: "dr-keypair-us-east"
+
+
 # Security Ops scripts repo
-  - name: ans_demo
+  - name: scripts_repo
     type: gitRepo
     integration: "dr-github"
     pointer:
-      sourceName: "devops-recipes/ans_demo"
+      sourceName: "devops-recipes/on-demand-test-environments"
       branch: master
 
-# AMI VPC Creation Config
-  - name: aws_region
+# AWS CLI config
+  - name: aws_cli_config
+    type: cliConfig
+    integration: dr-aws
+
+# SecOps approved AMI
+  - name: ami_sec_approved
     type: params
     version:
       params:
-        AWS_REGION: "us-east-1"
-
-##---------------------------------------------------------------#
-##----------------------- AMI VPC Resources --------------------#
-##---------------------------------------------------------------#
-
-# AMI VPC Creation Config
-#   - name: ami_conf
-#     type: params
-#     version:
-#       params:
-#         STATE_RES_NAME: "ami_info"
-#         VPC_NAME: "ami_vpc"
-#         VPC_CIDR_BLOCK: "200.0.0.0/16"
-#         VPC_SUBNET_NAME: "ami_vpc_subnet_pub"
-#         VPC_SUBNET_CIDR_BLOCK: "200.0.0.0/24"
-#         BASE_EC2_AMI: "ami-841f46ff"
-#
-# # Output of AMI Provisioning
-#   - name: ami_info
-#     type: params
-#     version:
-#       params:
-#         SEED: "initial_version"
-#
-# # Base ECS AMI ID
-#   - name: ami_sec_approved
-#     type: params
-#     version:
-#       params:
-#         SEED: "initial_version"
-
-###---------------------------------------------------------------#
-###----------------------- TF Resources --------------------#
-###---------------------------------------------------------------#
-# Instance Profile TERRAFORM State
-  - name: inst_tf_state
-    type: state
-
-# OUT Instance Profile Info
-  - name: inst_prof_name
-    type: params
-    version:
-      params:
-        SEED: "initial_version"
+        AMI_ID: "ami-9eb4b1e5"
 
 
 ###---------------------------------------------------------------#
@@ -94,20 +61,20 @@ resources:
 #---------------------------------------------------------------#
 #----------------------- TEST VPC Resources --------------------#
 #---------------------------------------------------------------#
-# Test VPC Creation Config
+# TEST environment config
+
   - name: test_conf
     type: params
     version:
       params:
+        EC2_REGION: "us-east-1"
+        EC2_TAG_ROLE: "dr-on-demand-test-environments"
+        EC2_TAG_TYPE: "ecs-container-instance"
+        EC2_VOLUME_SIZE: 30
+        EC2_COUNT: 2
         STATE_RES_NAME: "test_info"
-        VPC_NAME: "test_vpc"
-        VPC_CIDR_BLOCK: "210.0.0.0/16"
-        VPC_SUBNET_NAME: "test_vpc_subnet_pub"
-        VPC_SUBNET_CIDR_BLOCK: "210.0.0.0/24"
-        ECS_CLUSTER_NAME: "test-aws"
-        INST_COUNT: 2
-        INST_TAG: "test_ecs_inst"
-        INST_TYPE: "t2.micro"
+        ECS_CLUSTER_NAME: "test_env_ecs"
+        ENVIRONMENT: "test"
 
 # Output of Test Provisioning
   - name: test_info
@@ -115,6 +82,18 @@ resources:
     version:
       params:
         SEED: "initial_version"
+
+# Test VPC Info
+  - name: test_vpc_conf
+    type: params
+    version:
+      params:
+        TEST_VPC_ID: "vpc-a36912da"
+        TEST_PUBLIC_SG_ID: "sg-d95ab7a9"
+        TEST_PUBLIC_SN_01_ID: "subnet-f9fe0f9d"
+        TEST_PUBLIC_SN_02_ID: "subnet-3a95fe16"
+        REGION: "us-east-1"
+
 
 # Reference to ECS Test Cluster
   - name: test_env_ecs
@@ -142,59 +121,3 @@ resources:
       params:
         API_URL: "54.158.18.50:8080"
         API_TOKEN: "NA"
-
-# # Seed version resource
-#   - name: seed_app_ver
-#     type: version
-#     seed:
-#       versionName: "1.0.0"
-
-# # Current Prod version
-#   - name: prod_app_ver
-#     type: params
-#     version:
-#       params:
-#         RELEASE_VER_NUMBER: "1.0.0"
-
-#---------------------------------------------------------------#
-#----------------------- PROD VPC Resources --------------------#
-#---------------------------------------------------------------#
-
-# # Prod Creation Config
-#   - name: prod_conf
-#     type: params
-#     version:
-#       params:
-#         STATE_RES_NAME: "prod_info"
-#         VPC_NAME: "prod_vpc"
-#         VPC_CIDR_BLOCK: "100.0.0.0/16"
-#         VPC_SUBNET_NAME: "prod_vpc_subnet_pub"
-#         VPC_SUBNET_CIDR_BLOCK: "100.0.0.0/24"
-#         ECS_CLUSTER_NAME: "prod-aws"
-#         INST_COUNT: 3
-#         INST_TAG: "prod_ecs_inst"
-#         INST_TYPE: "t2.micro"
-#
-# # Output of Prod Provisioning
-#   - name: prod_info
-#     type: params
-#     version:
-#       params:
-#         SEED: "initial_version"
-#
-# # Reference to ECS Prod Cluster
-#   - name: prod_env_ecs
-#     type: cluster
-#     integration: "demo_aws_key"
-#     pointer:
-#       sourceName : "prod-aws"
-#       region: "us-east-1"
-#
-# #---------------------------------------------------------------#
-# #---------------------- CD to PROD Resources -------------------#
-# #---------------------------------------------------------------#
-# # Number of packaged WARs to deploy to Prod
-#   - name: scale_app_prod
-#     type: replicas
-#     version:
-#       count: 1
