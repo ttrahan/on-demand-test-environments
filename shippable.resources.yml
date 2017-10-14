@@ -84,7 +84,7 @@ resources:
         SEED: "initial_version"
 
 # Test VPC Info
-  - name: test_vpc_conf
+  - name: test_vpc_conf_odte
     type: params
     version:
       params:
