@@ -115,7 +115,7 @@ jobs:
     steps:
       - IN: create_app_man
         switch: off
-      - IN: prov_test_ecs
+      - IN: prov_test_vpc
       - IN: test_env_ecs
         switch: off
       - TASK: managed
@@ -173,24 +173,24 @@ jobs:
       - script: echo "FAILURE"
 
 
-# DEPROV TEST VPC with Ansible
-  - name: deprov_test_vpc
-    type: runSh
-    steps:
-      - IN: aws_region
-      - IN: deprov_test_infra
-      - IN: test_conf
-        switch: off
-      - IN: test_info
-        switch: off
-      - IN: aws_creds
-        switch: off
-      - IN: scripts_repo
-        switch: off
-      - TASK:
-        - script: |
-            export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
-            export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
-            cd $(shipctl get_resource_state scripts_repo)
-            shipctl replace an_vpc_deprov.yml
-            ansible-playbook -v an_vpc_deprov.yml
+# # DEPROV TEST VPC with Ansible
+#   - name: deprov_test_vpc
+#     type: runSh
+#     steps:
+#       - IN: aws_region
+#       - IN: deprov_test_infra
+#       - IN: test_conf
+#         switch: off
+#       - IN: test_info
+#         switch: off
+#       - IN: aws_creds
+#         switch: off
+#       - IN: scripts_repo
+#         switch: off
+#       - TASK:
+#         - script: |
+#             export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_creds aws_access_key_id)
+#             export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_creds aws_secret_access_key)
+#             cd $(shipctl get_resource_state scripts_repo)
+#             shipctl replace an_vpc_deprov.yml
+#             ansible-playbook -v an_vpc_deprov.yml
