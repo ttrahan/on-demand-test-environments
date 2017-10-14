@@ -91,13 +91,13 @@ jobs:
         switch: off
       - TASK:
         - script: echo $SCRIPTS_REPO_ODTE_STATE
-        - script: ls $SCRIPTS_REPO_ODTE_STATE        
+        - script: ls $SCRIPTS_REPO_ODTE_STATE
         - script: shipctl replace
             $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible/ansible.cfg
             $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible/group_vars/ecs-cluster-vars.yml
         - script: sudo pip install boto3
         - script: |
-            cd $SCRIPTSS_REPO_ODTE_STATE/infra/provision-ecs-ansible
+            cd $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible
             ansible-playbook -v ansible-ecs-provision.yml
       - OUT: test_env_ecs_odte
         overwrite: true
