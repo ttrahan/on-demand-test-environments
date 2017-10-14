@@ -128,7 +128,7 @@ jobs:
     steps:
       - IN: sit_repo
       - IN: deploy_app_test_odte
-      - IN: sit_params_odte
+      - IN: sit_params
       - TASK:
         - script: IN/sit_repo/gitRepo/test.sh sit_params
     on_success:

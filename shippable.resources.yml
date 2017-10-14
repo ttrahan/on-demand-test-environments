@@ -117,7 +117,7 @@ resources:
       branch: master
 
 # SIT env vars for BOX
-  - name: sit_params_odte
+  - name: sit_params
     type: params
     version:
       params:
