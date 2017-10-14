@@ -73,7 +73,7 @@ resources:
         EC2_VOLUME_SIZE: 30
         EC2_COUNT: 2
         STATE_RES_NAME: "test_info"
-        ECS_CLUSTER_NAME: "test_env_ecs"
+        ECS_CLUSTER_NAME: "test_env_ecs_odte"
         ENVIRONMENT: "test"
 
 # Output of Test Provisioning

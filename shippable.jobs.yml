@@ -57,7 +57,7 @@ jobs:
   - name: ci-push-docker-hub_runCI
     type: runCI
     steps:
-      - OUT: demo_doc_img
+      - OUT: demo_doc_img_odte
 
 # DEFINE app micro service
   - name: create_app_man_odte
@@ -91,8 +91,8 @@ jobs:
         switch: off
       - TASK:
         - script: shipctl replace
-            $OPS_REPO_ODTE_STATE/infra/provision-ecs-ansible/ansible.cfg
-            $OPS_REPO_ODTE_STATE/infra/provision-ecs-ansible/group_vars/ecs-cluster-vars.yml
+            $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible/ansible.cfg
+            $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible/group_vars/ecs-cluster-vars.yml
         - script: sudo pip install boto3
         - script: |
             cd $SCRIPTSS_REPO_ODTE_STATE/infra/provision-ecs-ansible
