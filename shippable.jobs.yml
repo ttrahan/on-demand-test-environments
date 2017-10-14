@@ -60,34 +60,34 @@ jobs:
       - OUT: demo_doc_img
 
 # DEFINE app micro service
-  - name: create_app_man
+  - name: create_app_man_odtv
     type: manifest
     steps:
-      - IN: demo_doc_img
-      - IN: doc_img_opts
+      - IN: demo_doc_img_odtv
+      - IN: doc_img_opts_odtv
 
 #---------------------------------------------------------------#
 #-------------- TEST Infra Prov Using ANsible  -----------------#
 #---------------------------------------------------------------#
 
 # PROV Test VPC with Ansible
-  - name: prov_test_vpc
+  - name: prov_test_vpc_odtv
     type: runSh
     steps:
-      - IN: create_app_man
-      - IN: aws_cli_config
+      - IN: create_app_man_odtv
+      - IN: aws_cli_config_odtv
         switch: off
-      - IN: aws_creds
+      - IN: aws_creds_odtv
         switch: off
-      - IN: aws_pem
+      - IN: aws_pem_odtv
         switch: off
-      - IN: ami_sec_approved
+      - IN: ami_sec_approved_odtv
         switch: off
-      - IN: scripts_repo
+      - IN: scripts_repo_odtv
         switch: off
-      - IN: test_conf
+      - IN: test_conf_odtv
         switch: off
-      - IN: test_vpc_conf
+      - IN: test_vpc_conf_odtv
         switch: off
       - TASK:
         - script: shipctl replace
@@ -97,9 +97,9 @@ jobs:
         - script: |
             cd $SCRIPTSS_REPO_STATE/infra/provision-ecs-ansible
             ansible-playbook -v ansible-ecs-provision.yml
-      - OUT: test_env_ecs
+      - OUT: test_env_ecs_odtv
         overwrite: true
-      - OUT: test_info
+      - OUT: test_info_odtv
     on_success:
       - script: echo "SUCCESS"
     on_failure:
@@ -110,23 +110,23 @@ jobs:
 ##---------------------------------------------------------------#
 
 # DEPLOY to TEST environment
-  - name: deploy_app_test
+  - name: deploy_app_test_odtv
     type: deploy
     steps:
-      - IN: create_app_man
+      - IN: create_app_man_odtv
         switch: off
-      - IN: prov_test_vpc
-      - IN: test_env_ecs
+      - IN: prov_test_vpc_odtv
+      - IN: test_env_ecs_odtv
         switch: off
       - TASK: managed
 
 # RUN System Integration Testing
-  - name: sit
+  - name: sit_odtv
     type: runSh
     steps:
-      - IN: sit_repo
-      - IN: deploy_app_test
-      - IN: sit_params
+      - IN: sit_repo_odtv
+      - IN: deploy_app_test_odtv
+      - IN: sit_params_odtv
       - TASK:
         - script: IN/sit_repo/gitRepo/test.sh sit_params
     on_success:
@@ -139,25 +139,25 @@ jobs:
 #---------------------------------------------------------------#
 
 # DEPROV TEST Infra with Ansible
-  - name: deprov_test_infra
+  - name: deprov_test_infra_odtv
     type: runSh
     steps:
-      - IN: sit
-      - IN: aws_cli_config
+      - IN: sit_odtv
+      - IN: aws_cli_config_odtv
         switch: off
-      - IN: test_vpc_conf
+      - IN: test_vpc_conf_odtv
         switch: off
-      - IN: test_conf
+      - IN: test_conf_odtv
         switch: off
-      - IN: test_info
+      - IN: test_info_odtv
         switch: off
-      - IN: aws_creds
+      - IN: aws_creds_odtv
         switch: off
-      - IN: aws_pem
+      - IN: aws_pem_odtv
         switch: off
-      - IN: scripts_repo
+      - IN: scripts_repo_odtv
         switch: off
-      - IN: ami_sec_approved
+      - IN: ami_sec_approved_odtv
         switch: off
       - TASK:
         - script: shipctl replace
