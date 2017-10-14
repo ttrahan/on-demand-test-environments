@@ -60,46 +60,46 @@ jobs:
       - OUT: demo_doc_img
 
 # DEFINE app micro service
-  - name: create_app_man_odtv
+  - name: create_app_man_odte
     type: manifest
     steps:
-      - IN: demo_doc_img_odtv
-      - IN: doc_img_opts_odtv
+      - IN: demo_doc_img_odte
+      - IN: doc_img_opts_odte
 
 #---------------------------------------------------------------#
 #-------------- TEST Infra Prov Using ANsible  -----------------#
 #---------------------------------------------------------------#
 
 # PROV Test VPC with Ansible
-  - name: prov_test_vpc_odtv
+  - name: prov_test_vpc_odte
     type: runSh
     steps:
-      - IN: create_app_man_odtv
-      - IN: aws_cli_config_odtv
+      - IN: create_app_man_odte
+      - IN: aws_cli_config_odte
         switch: off
-      - IN: aws_creds_odtv
+      - IN: aws_creds_odte
         switch: off
-      - IN: aws_pem_odtv
+      - IN: aws_pem_odte
         switch: off
-      - IN: ami_sec_approved_odtv
+      - IN: ami_sec_approved_odte
         switch: off
-      - IN: scripts_repo_odtv
+      - IN: scripts_repo_odte
         switch: off
-      - IN: test_conf_odtv
+      - IN: test_conf_odte
         switch: off
-      - IN: test_vpc_conf_odtv
+      - IN: test_vpc_conf_odte
         switch: off
       - TASK:
         - script: shipctl replace
-            $OPS_REPO_STATE/infra/provision-ecs-ansible/ansible.cfg
-            $OPS_REPO_STATE/infra/provision-ecs-ansible/group_vars/ecs-cluster-vars.yml
+            $OPS_REPO_ODTE_STATE/infra/provision-ecs-ansible/ansible.cfg
+            $OPS_REPO_ODTE_STATE/infra/provision-ecs-ansible/group_vars/ecs-cluster-vars.yml
         - script: sudo pip install boto3
         - script: |
-            cd $SCRIPTSS_REPO_STATE/infra/provision-ecs-ansible
+            cd $SCRIPTSS_REPO_ODTE_STATE/infra/provision-ecs-ansible
             ansible-playbook -v ansible-ecs-provision.yml
-      - OUT: test_env_ecs_odtv
+      - OUT: test_env_ecs_odte
         overwrite: true
-      - OUT: test_info_odtv
+      - OUT: test_info_odte
     on_success:
       - script: echo "SUCCESS"
     on_failure:
@@ -110,25 +110,25 @@ jobs:
 ##---------------------------------------------------------------#
 
 # DEPLOY to TEST environment
-  - name: deploy_app_test_odtv
+  - name: deploy_app_test_odte
     type: deploy
     steps:
-      - IN: create_app_man_odtv
+      - IN: create_app_man_odte
         switch: off
-      - IN: prov_test_vpc_odtv
-      - IN: test_env_ecs_odtv
+      - IN: prov_test_vpc_odte
+      - IN: test_env_ecs_odte
         switch: off
       - TASK: managed
 
 # RUN System Integration Testing
-  - name: sit_odtv
+  - name: sit_odte
     type: runSh
     steps:
-      - IN: sit_repo_odtv
-      - IN: deploy_app_test_odtv
-      - IN: sit_params_odtv
+      - IN: sit_repo_odte
+      - IN: deploy_app_test_odte
+      - IN: sit_params_odte
       - TASK:
-        - script: IN/sit_repo/gitRepo/test.sh sit_params
+        - script: IN/sit_repo_odte/gitRepo/test.sh sit_params
     on_success:
       - script: touch /build/state/success.txt
     on_failure:
@@ -139,33 +139,33 @@ jobs:
 #---------------------------------------------------------------#
 
 # DEPROV TEST Infra with Ansible
-  - name: deprov_test_infra_odtv
+  - name: deprov_test_infra_odte
     type: runSh
     steps:
-      - IN: sit_odtv
-      - IN: aws_cli_config_odtv
+      - IN: sit_odte
+      - IN: aws_cli_config_odte
         switch: off
-      - IN: test_vpc_conf_odtv
+      - IN: test_vpc_conf_odte
         switch: off
-      - IN: test_conf_odtv
+      - IN: test_conf_odte
         switch: off
-      - IN: test_info_odtv
+      - IN: test_info_odte
         switch: off
-      - IN: aws_creds_odtv
+      - IN: aws_creds_odte
         switch: off
-      - IN: aws_pem_odtv
+      - IN: aws_pem_odte
         switch: off
-      - IN: scripts_repo_odtv
+      - IN: scripts_repo_odte
         switch: off
-      - IN: ami_sec_approved_odtv
+      - IN: ami_sec_approved_odte
         switch: off
       - TASK:
         - script: shipctl replace
-            $SCRIPTS_REPO_STATE/infra/provision-ecs-ansible/ansible.cfg
-            $SCRIPTS_REPO_STATE/infra/provision-ecs-ansible/group_vars/ecs-cluster-vars.yml
+            $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible/ansible.cfg
+            $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible/group_vars/ecs-cluster-vars.yml
         - script: sudo pip install boto3
         - script: |
-            cd $SCRIPTS_REPO_STATE/infra/provision-ecs-ansible
+            cd $SCRIPTS_REPO_ODTE_STATE/infra/provision-ecs-ansible
             ansible-playbook -v ansible-ecs-terminate.yml
     on_success:
       - script: echo "SUCCESS"

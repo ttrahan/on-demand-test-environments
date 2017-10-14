@@ -5,18 +5,18 @@ resources:
 #---------------------------------------------------------------#
 
 # AWS credentials
-  - name: aws_creds_odtv
+  - name: aws_creds_odte
     type: integration
     integration: "dr-aws"
 
 # AWS PEM key
-  - name: aws_pem_odtv
+  - name: aws_pem_odte
     type: integration
     integration: "dr-keypair-us-east"
 
 
 # Security Ops scripts repo
-  - name: scripts_repo_odtv
+  - name: scripts_repo_odte
     type: gitRepo
     integration: "dr-github"
     pointer:
@@ -24,12 +24,12 @@ resources:
       branch: master
 
 # AWS CLI config
-  - name: aws_cli_config_odtv
+  - name: aws_cli_config_odte
     type: cliConfig
     integration: dr-aws
 
 # SecOps approved AMI
-  - name: ami_sec_approved_odtv
+  - name: ami_sec_approved_odte
     type: params
     version:
       params:
@@ -41,7 +41,7 @@ resources:
 ###---------------------------------------------------------------#
 
 # Docker Image packaging sample Node app
-  - name: demo_doc_img_odtv
+  - name: demo_doc_img_odte
     type: image
     integration: "dr-dockerhub"
     pointer:
@@ -50,7 +50,7 @@ resources:
       versionName: "master.4"
 
 # Docker Options for packaged
-  - name: doc_img_opts_odtv
+  - name: doc_img_opts_odte
     type: dockerOptions
     version:
 #      memory: 256
@@ -63,7 +63,7 @@ resources:
 #---------------------------------------------------------------#
 # TEST environment config
 
-  - name: test_conf_odtv
+  - name: test_conf_odte
     type: params
     version:
       params:
@@ -77,14 +77,14 @@ resources:
         ENVIRONMENT: "test"
 
 # Output of Test Provisioning
-  - name: test_info_odtv
+  - name: test_info_odte
     type: params
     version:
       params:
         SEED: "initial_version"
 
 # Test VPC Info
-  - name: test_vpc_conf_odtv_odtv
+  - name: test_vpc_conf_odte_odte
     type: params
     version:
       params:
@@ -96,7 +96,7 @@ resources:
 
 
 # Reference to ECS Test Cluster
-  - name: test_env_ecs_odtv
+  - name: test_env_ecs_odte
     type: cluster
     integration: "dr-aws"
     pointer:
@@ -107,7 +107,7 @@ resources:
 #------------- Application Release Automation Resources --------#
 #---------------------------------------------------------------#
 # REPO of SIT code
-  - name: sit_repo_odtv
+  - name: sit_repo_odte
     type: gitRepo
     integration: "dr-github"
     pointer:
@@ -115,7 +115,7 @@ resources:
       branch: master
 
 # SIT env vars for BOX
-  - name: sit_params_odtv
+  - name: sit_params_odte
     type: params
     version:
       params:
