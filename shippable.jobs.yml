@@ -22,9 +22,15 @@ jobs:
     steps:
       - IN: vote_fe_odte
       - IN: vote_fe_params_odte
+        applyTo:
+          - vote_fe_odte
       - IN: vote_fe_options_odte
+        applyTo:
+          - vote_fe_odte
       - IN: vote_be_odte
       - IN: vote_be_options_odte
+        applyTo:
+          - vote_be_odte
 
 #---------------------------------------------------------------#
 #-------------- TEST Infra Prov Using ANsible  -----------------#
