@@ -1,22 +1,109 @@
 jobs:
+  - name: vote_be_runCI
+    type: runCI
+    steps:
+      - OUT: vote_be
+
+  - name: vote_fe_runCI
+    type: runCI
+    steps:
+      - OUT: vote_fe
+
+  - name: vote-fe-temp
+    type: manifest
+    steps:
+      - IN: vote_fe
+      - TASK: managed
+
+  - name: vote-be-temp
+    type: manifest
+    steps:
+      - IN: vote_be
+      - TASK: managed
+
+  - name: deploy-test-vote-app
+    type: deploy
+    method: replace
+    steps:
+      - IN: vote-be-temp
+      - IN: vote-fe-temp
+      - IN: gke_cluster
+      - IN: test_fe_params
+        applyTo:
+          - vote-fe-temp
+      - IN: test_fe_options
+        applyTo:
+          - vote-fe-temp
+      - IN: test_be_options
+        applyTo:
+          - vote-be-temp
+
+  - name: prov_test_lb
+    type: provision
+    steps:
+      - IN: test_be_lb
+      - IN: test_fe_lb
+      - IN: deploy-test-vote-app
+        switch: off
+
+  - name: rel_prod
+    type: release
+    bump: minor
+    steps:
+      - IN: prod_sem_ver
+      - IN: deploy-test-vote-app
+        switch: off
+
+  - name: deploy-prod-vote-app
+    type: deploy
+    method: replace
+    steps:
+      - IN: rel_prod
+      - IN: gke_cluster
+      - IN: prod_fe_params
+        applyTo:
+          - vote-fe-temp
+      - IN: prod_fe_options
+        applyTo:
+          - vote-fe-temp
+      - IN: prod_be_options
+        applyTo:
+          - vote-be-temp
+
+  - name: prov_prod_lb
+    type: provision
+    steps:
+      - IN: prod_be_lb
+      - IN: prod_fe_lb
+      - IN: deploy-prod-vote-app
+        switch: off
+jobs:
 
 #---------------------------------------------------------------#
 #------------------- BUILD/CI with SHIPPABLE CI ----------------#
 #---------------------------------------------------------------#
 
- # PACKAGE sample Node.js into docker container
+ # PACKAGE and push app front-end and back-end code into docker hub
 
-  - name: ci-push-docker-hub_runCI
+  - name: vote_be_runCI
     type: runCI
     steps:
-      - OUT: demo_doc_img_odte
+      - OUT: vote_be_odte
+
+  - name: vote_fe_runCI
+    type: runCI
+    steps:
+      - OUT: vote_fe_odte
 
 # DEFINE app micro service
   - name: create_app_man_odte
     type: manifest
     steps:
-      - IN: demo_doc_img_odte
-      - IN: doc_img_opts_odte
+      - IN: vote_fe_odte
+      - IN: vote_fe_params_odte
+      - IN: vote_fe_options_odte
+      - IN: vote_be_odte
+      - IN: vote_be_options_odte
 
 #---------------------------------------------------------------#
 #-------------- TEST Infra Prov Using ANsible  -----------------#

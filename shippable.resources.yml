@@ -37,28 +37,52 @@ resources:
       params:
         AMI_ID: "ami-9eb4b1e5"
 
-
 ###---------------------------------------------------------------#
 ###----------------------- BUILD/CI Resources --------------------#
 ###---------------------------------------------------------------#
 
-# Docker Image packaging sample Node app
-  - name: demo_doc_img_odte
+# Front-end image
+  - name: vote_fe_odte
     type: image
-    integration: "dr-dockerhub"
+    integration: dr-dockerhub
     pointer:
-      sourceName: "devopsrecipes/ci-push-docker-hub"
+      sourceName: "devopsrecipes/vote_fe"
     seed:
-      versionName: "master.4"
+      versionName: "master.3"
 
-# Docker Options for packaged
-  - name: doc_img_opts_odte
+# Back-end image
+  - name: vote_be_odte
+    type: image
+    integration: dr-dockerhub
+    pointer:
+      sourceName: "devopsrecipes/vote_be"
+    seed:
+      versionName: "master.2"
+
+  - name: vote_be_options_odte
     type: dockerOptions
     version:
-#      memory: 256
-#      cpuShares: 256
+      memory: 128
       portMappings:
-        - 80:80
+        - "6379:6379/tcp"
+      labels:
+        app: "test_be"
+
+  - name: vote_fe_params_odte
+    type: params
+    version:
+      params:
+        REDIS: "localhost:6379"
+
+  - name: vote_fe_options_odte
+    type: dockerOptions
+    version:
+      memory: 128
+      portMappings:
+        - "80:80/tcp"
+      labels:
+        app: "test_fe"
+
 
 #---------------------------------------------------------------#
 #----------------------- TEST VPC Resources --------------------#
@@ -73,7 +97,7 @@ resources:
         EC2_TAG_ROLE: "dr-on-demand-test-environments"
         EC2_TAG_TYPE: "ecs-container-instance"
         EC2_VOLUME_SIZE: 30
-        EC2_COUNT: 2
+        EC2_COUNT: 1
         STATE_RES_NAME: "test_info"
         ECS_CLUSTER_NAME: "test_env_ecs_odte"
         ENVIRONMENT: "test"
