@@ -74,6 +74,7 @@ jobs:
 # DEPLOY to TEST environment
   - name: deploy_app_test_odte
     type: deploy
+    method: replace
     steps:
       - IN: create_app_man_odte
         switch: off
