@@ -7,7 +7,7 @@ resources:
 # AWS credentials
   - name: aws_creds_odte
     type: integration
-    integration: "dr-aws"
+    integration: "dr-aws-keys"
 
 # AWS PEM key
   - name: aws_pem_odte
@@ -26,7 +26,7 @@ resources:
 # AWS CLI config
   - name: aws_cli_config_odte
     type: cliConfig
-    integration: dr-aws
+    integration: dr-aws-keys
     pointer:
       region: us-east-1
 
@@ -124,7 +124,7 @@ resources:
 # Reference to ECS Test Cluster
   - name: test_env_ecs_odte
     type: cluster
-    integration: "dr-aws"
+    integration: "dr-aws-keys"
     pointer:
       sourceName : "test_env_ecs_odte"
       region: "us-east-1"
