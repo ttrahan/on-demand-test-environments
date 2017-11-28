@@ -110,14 +110,24 @@ resources:
         SEED: "initial_version"
 
 # Test VPC Info
+  # - name: test_vpc_conf_odte
+  #   type: params
+  #   version:
+  #     params:
+  #       TEST_VPC_ID: "vpc-a36912da"
+  #       TEST_PUBLIC_SG_ID: "sg-d95ab7a9"
+  #       TEST_PUBLIC_SN_01_ID: "subnet-f9fe0f9d"
+  #       TEST_PUBLIC_SN_02_ID: "subnet-3a95fe16"
+  #       REGION: "us-east-1"
+
   - name: test_vpc_conf_odte
     type: params
     version:
       params:
         TEST_VPC_ID: "vpc-a36912da"
-        TEST_PUBLIC_SG_ID: "sg-d95ab7a9"
-        TEST_PUBLIC_SN_01_ID: "subnet-f9fe0f9d"
-        TEST_PUBLIC_SN_02_ID: "subnet-3a95fe16"
+        TEST_PUBLIC_SG_ID: "sg-c30fc8b6"
+        TEST_PUBLIC_SN_01_ID: "subnet-34378e50"
+        TEST_PUBLIC_SN_02_ID: "subnet-34378e50"
         REGION: "us-east-1"
 
 
