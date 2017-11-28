@@ -41,6 +41,7 @@ jobs:
     type: runSh
     steps:
       - IN: create_app_man_odte
+        switch: off
       - IN: aws_cli_config_odte
         switch: off
       - IN: aws_creds_odte
