@@ -112,6 +112,7 @@ jobs:
     type: runSh
     steps:
       - IN: sit_odte
+        switch: off
       - IN: aws_cli_config_odte
         switch: off
       - IN: test_vpc_conf_odte
