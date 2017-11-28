@@ -94,7 +94,9 @@ jobs:
     type: runSh
     steps:
       - IN: sit_repo
+        switch: off
       - IN: deploy_app_test_odte
+        switch: off
       - IN: sit_params
       - TASK:
         - script: IN/sit_repo/gitRepo/test.sh sit_params
