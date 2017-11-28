@@ -63,8 +63,6 @@ resources:
     type: dockerOptions
     version:
       memory: 128
-      portMappings:
-        - "6379:6379/tcp"
       labels:
         app: "test_be"
 
@@ -80,6 +78,8 @@ resources:
       memory: 128
       portMappings:
         - "80:5000/tcp"
+      links:
+        - vote_be_odte:redis
       labels:
         app: "test_fe"
 
