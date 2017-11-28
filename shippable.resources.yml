@@ -79,7 +79,7 @@ resources:
     version:
       memory: 128
       portMappings:
-        - "80:80/tcp"
+        - "80:5000/tcp"
       labels:
         app: "test_fe"
 
