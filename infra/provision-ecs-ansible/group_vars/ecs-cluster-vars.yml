@@ -1,4 +1,4 @@
-ec2_instance_type: "t2.micro"
+ec2_instance_type: "t2.large"
 ec2_image: "ami-9eb4b1e5"
 ec2_keypair: "ambarish-useast1"
 ec2_user_data: "#!/bin/bash \n echo ECS_CLUSTER=\"${ECS_CLUSTER_NAME}\" >> /etc/ecs/ecs.config"
